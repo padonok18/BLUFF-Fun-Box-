@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird Telegram</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        :root {
+            --primary: #2b5278;
+            --secondary: #3a7bb8;
+            --accent: #4caf50;
+            --text: #ffffff;
+            --bg: #000000;
+            --card-bg: #1a1a1a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Press Start 2P', cursive;
+        }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        
+        .container {
+            max-width: 100%;
+            padding: 15px;
+            overflow: hidden;
+            max-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 2px solid var(--secondary);
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 20px;
+            color: var(--accent);
+            text-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--secondary);
+        }
+        
+        .tab {
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+        
+        .tab.active {
+            color: var(--accent);
+            border-bottom: 3px solid var(--accent);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid var(--secondary);
+            box-shadow: 0 0 10px rgba(58, 123, 184, 0.3);
+        }
+        
+        .card-title {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .profile-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .stat-item {
+            background-color: var(--primary);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--primary);
+        }
+        
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #000;
+            font-size: 20px;
+        }
+        
+        .achievement-icon.completed {
+            background-color: #ffd700;
+            color: #000;
+        }
+        
+        .achievement-info {
+            flex: 1;
+        }
+        
+        .achievement-title {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .achievement-desc {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background-color: var(--primary);
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+        }
+        
+        .game-section {
+            display: none;
+        }
+        
+        .game-section.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        canvas {
+            background-color: #4a9fe0;
+            border-radius: 10px;
+            border: 3px solid var(--secondary);
+            max-width: 100%;
+            max-height: 60vh;
+        }
+        
+        .game-controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .game-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .score-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 300px;
+            margin: 15px 0;
+        }
+        
+        .score-box {
+            background-color: var(--primary);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            min-width: 120px;
+            font-size: 12px;
+        }
+
+        /* Стили для мини-игр */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .game-card {
+            background-color: var(--primary);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid var(--secondary);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(58, 123, 184, 0.3);
+        }
+        
+        .game-card.active {
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        
+        .game-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .game-title {
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: var(--accent);
+        }
+        
+        .game-desc {
+            font-size: 9px;
+            opacity: 0.7;
+            line-height: 1.3;
+        }
+
+        /* Стили для достижений по играм */
+        .game-achievement-title {
+            color: var(--secondary);
+            font-size: 12px;
+            margin: 20px 0 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--primary);
+        }
+
+        /* Стили для друзей */
+        .invite-block {
+            display: flex;
+            margin-bottom: 20px;
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .invite-link {
+            flex: 1;
+            padding: 10px;
+            background-color: var(--card-bg);
+            font-size: 10px;
+            word-break: break-all;
+            border-right: 2px solid var(--secondary);
+        }
+        
+        #copyBtn {
+            border-radius: 0;
+            border: none;
+            font-size: 10px;
+            padding: 0 15px;
+        }
+        
+        .friends-list {
+            margin-top: 15px;
+        }
+        
+        .friend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--primary);
+        }
+        
+        .friend-avatar {
+            width: 30px;
+            height: 30px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+        
+        .friend-name {
+            flex: 1;
+            font-size: 11px;
+        }
+        
+        .friend-score {
+            font-size: 10px;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">FLAPPY BIRD</div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="game">Игра</div>
+            <div class="tab" data-tab="games">Мини-игры</div>
+            <div class="tab" data-tab="friends">Друзья</div>
+            <div class="tab" data-tab="profile">Профиль</div>
+            <div class="tab" data-tab="achievements">Достижения</div>
+        </div>
+        
+        <div class="game-section active" id="gameSection">
+            <div class="score-container">
+                <div class="score-box">
+                    Текущий: <span id="currentScore">0</span>
+                </div>
+                <div class="score-box">
+                    Рекорд: <span id="highScore">0</span>
+                </div>
+            </div>
+            
+            <canvas id="gameCanvas" width="300" height="400"></canvas>
+            
+            <div class="game-controls">
+                <button class="game-btn" id="startButton">Старт</button>
+                <button class="game-btn" id="backButton" style="display: none;">Назад</button>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="gamesTab">
+            <div class="card">
+                <h3 class="card-title">МИНИ-ИГРЫ</h3>
+                <p style="font-size: 10px; margin-bottom: 15px; opacity: 0.7;">Выберите игру из списка</p>
+                
+                <div class="games-grid">
+                    <div class="game-card active" data-game="flappy">
+                        <div class="game-icon">🦋</div>
+                        <div class="game-title">Flappy Bird</div>
+                        <div class="game-desc">Классическая игра</div>
+                    </div>
+                    
+                    <div class="game-card" data-game="dino">
+                        <div class="game-icon">🦖</div>
+                        <div class="game-title">Dino Run</div>
+                        <div class="game-desc">Беги и прыгай</div>
+                    </div>
+                    
+                    <div class="game-card" data-game="snake">
+                        <div class="game-icon">🐍</div>
+                        <div class="game-title">Змейка</div>
+                        <div class="game-desc">Классическая змейка</div>
+                    </div>
+                    
+                    <div class="game-card" data-game="puzzle">
+                        <div class="game-icon">🧩</div>
+                        <div class="game-title">Головоломка</div>
+                        <div class="game-desc">Игра на логику</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="friendsTab">
+            <div class="card">
+                <h3 class="card-title">ДРУЗЬЯ</h3>
+                <p style="font-size: 10px; margin-bottom: 15px; opacity: 0.7;">Пригласите друзей в игру</p>
+                
+                <div class="invite-block">
+                    <div class="invite-link" id="inviteLink">https://t.me/gamebot?start=flappy</div>
+                    <button class="game-btn" id="copyBtn">Копировать</button>
+                </div>
+                
+                <div class="friends-list">
+                    <div class="friend-item">
+                        <div class="friend-avatar">A</div>
+                        <div class="friend-name">Алексей</div>
+                        <div class="friend-score">120 очков</div>
+                    </div>
+                    <div class="friend-item">
+                        <div class="friend-avatar">M</div>
+                        <div class="friend-name">Мария</div>
+                        <div class="friend-score">85 очков</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="profileTab">
+            <div class="card">
+                <div class="profile-info">
+                    <div class="profile-avatar">TG</div>
+                    <div>
+                        <h3 class="card-title">ИГРОК</h3>
+                        <p style="font-size: 10px;">@username</p>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalGames">0</div>
+                        <div class="stat-label">ИГР СЫГРАНО</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalScore">0</div>
+                        <div class="stat-label">ОБЩИЙ СЧЕТ</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="achievementsCount">0</div>
+                        <div class="stat-label">ДОСТИЖЕНИЯ</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="favoriteGame">-</div>
+                        <div class="stat-label">ЛЮБИМАЯ ИГРА</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">СТАТИСТИКА</h3>
+                <div class="stat-item">
+                    <div class="stat-value" id="flappyStats">0</div>
+                    <div class="stat-label">FLAPPY BIRD РЕКОРД</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="achievementsTab">
+            <div class="card">
+                <h3 class="card-title">ВАШИ ДОСТИЖЕНИЯ</h3>
+                
+                <h4 class="game-achievement-title">FLAPPY BIRD</h4>
+                <div class="achievement-item">
+                    <div class="achievement-icon">🏆</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">НОВИЧОК</div>
+                        <div class="achievement-desc">Сыграйте первую игру</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="flappy-newbie" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">🦅</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">ПТИЧКА</div>
+                        <div class="achievement-desc">Наберите 10 очков</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="flappy-bird" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">👑</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">КОРОЛЬ НЕБА</div>
+                        <div class="achievement-desc">Наберите 50 очков</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="flappy-king" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">🚀</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">АС</div>
+                        <div class="achievement-desc">Наберите 100 очков</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="flappy-ace" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">💎</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">ЛЕГЕНДА</div>
+                        <div class="achievement-desc">Наберите 500 очков</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="flappy-legend" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">🏅</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">БОГ</div>
+                        <div class="achievement-desc">Наберите 1000 очков</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="flappy-god" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h4 class="game-achievement-title">DINO RUN</h4>
+                <div class="achievement-item">
+                    <div class="achievement-icon">🥚</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">ЯЙЦЕГОЛОВЫЙ</div>
+                        <div class="achievement-desc">Сыграйте первую игру</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="dino-newbie" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">🦴</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">БЕГУН</div>
+                        <div class="achievement-desc">Пробегите 1000 м</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="dino-runner" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h4 class="game-achievement-title">ЗМЕЙКА</h4>
+                <div class="achievement-item">
+                    <div class="achievement-icon">🐣</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">ПОЛЗУН</div>
+                        <div class="achievement-desc">Сыграйте первую игру</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="snake-newbie" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">🐍</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">УДАВ</div>
+                        <div class="achievement-desc">Соберите змейку из 20 частей</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="snake-boa" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация Telegram WebApp
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.expand();
+            Telegram.WebApp.enableClosingConfirmation();
+            Telegram.WebApp.setBackgroundColor('#000000');
+            Telegram.WebApp.setHeaderColor('#2b5278');
+            Telegram.WebApp.MainButton.showProgress(false);
+            Telegram.WebApp.MainButton.hide();
+            Telegram.WebApp.disableZoom();
+            
+            // Получаем данные пользователя
+            const user = Telegram.WebApp.initDataUnsafe.user;
+            if (user) {
+                const avatar = document.querySelector('.profile-avatar');
+                const username = document.querySelector('.profile-info p');
+                
+                if (user.first_name) {
+                    avatar.textContent = user.first_name[0];
+                }
+                if (user.username) {
+                    username.textContent = `@${user.username}`;
+                }
+                
+                // Устанавливаем реферальную ссылку
+                if (Telegram.WebApp.initDataUnsafe.start_param) {
+                    document.getElementById('inviteLink').textContent = 
+                        `https://t.me/${user.username}?start=flappy_${Telegram.WebApp.initDataUnsafe.start_param}`;
+                }
+            }
+        }
+        
+        // Запрет масштабирования
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+        
+        // Копирование ссылки
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const link = document.getElementById('inviteLink').textContent;
+            try {
+                await navigator.clipboard.writeText(link);
+                document.getElementById('copyBtn').textContent = 'Скопировано!';
+                setTimeout(() => {
+                    document.getElementById('copyBtn').textContent = 'Копировать';
+                }, 2000);
+            } catch (err) {
+                console.error('Ошибка копирования:', err);
+                document.getElementById('copyBtn').textContent = 'Ошибка';
+                setTimeout(() => {
+                    document.getElementById('copyBtn').textContent = 'Копировать';
+                }, 2000);
+            }
+        });
+        
+        // Переключение табов
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('gameSection').classList.remove('active');
+                
+                tab.classList.add('active');
+                
+                if (tab.dataset.tab === 'game') {
+                    document.getElementById('gameSection').classList.add('active');
+                } else {
+                    document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
+                }
+            });
+        });
+        
+        // Обработчики для карточек игр
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Убираем выделение у всех карточек
+                document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active'));
+                // Выделяем текущую выбранную игру
+                this.classList.add('active');
+                
+                const game = this.getAttribute('data-game');
+                if (game === 'flappy') {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="game"]').classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.getElementById('gameSection').classList.add('active');
+                } else {
+                    alert('Эта игра появится в следующем обновлении!');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
